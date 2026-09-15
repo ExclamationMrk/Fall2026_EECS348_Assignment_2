@@ -22,13 +22,15 @@ Collaborators:   None
 Other Sources:   Google Gemini (GenAI assistance for EECS 348 Assignment 2)
 Author:          Dylan Miller
 Creation Date:   September 11, 2026
-Revision Date:   September 11, 2026
+Revision Date:   September 15, 2026
 Revisions:       Created file and had Gemini create first revision of the program
                  commented each line, added new lines between statements to make them more readable
                  Implemented date validation, so now the date must actually exist to be an Email. It will error out if something goes wrong
                  Implemeneted space and time complexity saving things.
                     - MaxHeap array is now an array of pointers to the structs instead of the actual values
                     - The array's memory allocated now shrinks dynamically when emails are removed. Before, it only grew
+                 Implemented exitin on invalid commands
+                
 */
 
 /*
@@ -788,6 +790,9 @@ void process_input(FILE *fp) {
         } else if (strcmp(trimmed_line, "COUNT") == 0) {
             // Print the current count of unread emails residing in the heap
             printf("There are %d emails to read.\n", heap->size);
+
+            // Print trailing blank line to visually separate command output blocks
+            printf("\n");
         // Check if command keyword is "NEXT"
         } else if (strcmp(trimmed_line, "NEXT") == 0) {
             // Retrieve pointer to highest-priority email without popping it
@@ -812,10 +817,23 @@ void process_input(FILE *fp) {
                 printf("No emails to read.\n");
             // End of non-empty next email check
             }
+
+            // Print trailing blank line to visually separate command output blocks
+            printf("\n");
         // Check if command keyword is "READ"
         } else if (strcmp(trimmed_line, "READ") == 0) {
             // Remove highest-priority email from queue without storing or printing output
             extract_max(heap, NULL);
+        // Check for other commands
+        } else {
+            // Print error message for a bad command
+            printf("Error: unrecognized command '%s'\n", trimmed_line);
+            
+            // Print ending program
+            printf("Ending program.\n");
+            
+            // Exit program with error code
+            exit(EXIT_FAILURE);
         // End of command dispatch ladder
         }
     // End of while loop reading file line by line
@@ -884,8 +902,11 @@ int main(int argc, char *argv[]) {
                     }
                 // User pressed enter without typing a filename
                 } else {
-                    // Fall back to reading from standard input
-                    fp = stdin;
+                    // Print error message indicating no filename was provided
+                    fprintf(stderr, "Error: No file name provided.\n");
+
+                    // Terminate program with failure exit code
+                    return EXIT_FAILURE;
                 // End of clean_name length check
                 }
             // Error or EOF encountered while reading user input prompt
